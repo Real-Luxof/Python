@@ -1,5 +1,10 @@
 from sys import argv as param
 
+def findoption(params, opt):
+    for option in params:
+        if opt in option: return option.split(opt)[1]
+    return False
+
 if len(param) > 1:
     with open(param[1], "r") as file:
         data = file.read()
@@ -104,14 +109,27 @@ if len(param) > 1:
         "whatdoItYPEAAAAA": "`",
         "IndustrialRevolutionAndItsConsequencesHaveBeenADisasterForTheHumanRace": "~",
     }
-    if len(param) > 2: resultfile = param[2]
+    cuttables = [["THEWORLDWONDERS", "TASKFORCETHIRTY-FOUR"],["SINCEWHEN", "DIDYOUCARE?"],["isitreallybasedthoughh?" + "THEEIGHTWORLDWONDERS"],["heheheha", "hohohohu"]]
+    if findoption(param,"password=") != False: password = findoption(param,"password="); password1 = password[:len(password)//2]; password2 = password[len(password)//2]
+    else: password1 = "ba"; password2 = "se"
+    if findoption(param, "resultfile=") != False: resultfile = findoption(param,"resultfile=")
     else: resultfile = "DECRYPTIONRESULT.txt"
     output = ""
+    
+    if [data[0], data[-1]] in cuttables:
+        if password1 == data[1] and password2 == data[-2]:
+            del data[0]
+            del data[0]
+            del data[-1]
+            del data[-1]
+            for word in data:
+                output += decryptiontable[word]
 
-    for word in data:
-        output += decryptiontable[word]
-
-    with open(resultfile, "w+") as f:
-        f.write(output)
+            with open(resultfile, "w+") as f:
+                f.write(output)
+        else:
+            print("INCORRECT PASSWORD!")
+    else:
+        print("MANIPULATED AND/OR BAD FILE ENCOUNTERED!")
 else:
-    print("Usage: decrypt (required)file (optional)resultfile")
+    print("Usage: decrypt (required)file (optional)resultfile=(entername) (optional)password=(enterpassword)\nDon't forget the resultfile= and password=.")

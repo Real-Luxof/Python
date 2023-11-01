@@ -1,4 +1,10 @@
 from sys import argv as param
+from random import choice
+
+def findoption(params, opt):
+    for option in params:
+        if opt in option: return option.split(opt)[1]
+    return False
 
 if len(param) > 1:
     with open(param[1], "r") as file:
@@ -103,14 +109,17 @@ if len(param) > 1:
         "`": "whatdoItYPEAAAAA ",
         "~": "IndustrialRevolutionAndItsConsequencesHaveBeenADisasterForTheHumanRace "
     }
-
+    cuttables = [["THEWORLDWONDERS", "TASKFORCETHIRTY-FOUR"],["SINCEWHEN", "DIDYOUCARE?"],["isitreallybasedthoughh?" + "THEEIGHTWORLDWONDERS"],["heheheha", "hohohohu"],["IndustrialRevolutionAndItsConsequencesHaveBeenADisasterForTheHumanRace","IndustrialRevolutionAndItsConsequencesHaveBeenADisasterForTheHumanRace"]]
     output = ""
-    if len(param) > 2: resultfile = param[2]
-    else: resultfile = "ENCRYPTIONRESULT.txt"
+    if findoption(param,"password=") != False: password = findoption(param,"password="); password1 = password[:len(password)//2]; password2 = password[len(password)//2]
+    else: password1 = "ba"; password2 = "se"
+    if findoption(param, "resultfile=") != False: resultfile = findoption(param,"resultfile=")
+    else: resultfile = "DECRYPTIONRESULT.txt"
     for char in data:
         output += encryptiontable[char]
 
     with open(resultfile, "w+") as f:
-        f.write(output)
+        cuttable = choice(cuttables)
+        f.write(cuttable[0] + " " + password1 + " " + output + " " + password2 + " " + cuttable[1])
 else:
-    print("Usage: encrypt (required)file (optional)resultfile")
+    print("Usage: decrypt (required)file (optional)resultfile=(entername) (optional)password=(enterpassword)\nDon't forget the resultfile= and password=.")
