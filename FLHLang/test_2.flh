@@ -1,0 +1,3 @@
+console.log("smh")
+var foo = "smh"
+console.out(foo)
