@@ -42,3 +42,13 @@ def console(line: str) -> None:
         console.out("Hello World!")
         console.in("Say Hi! > ")
     """
+    # Initialize a few variables
+    cline = line.split(".")
+    inpar = []
+    instr = []
+    inparID = []
+    instrID = []
+    if cline[1].startswith("out("):
+        for letter in cline.split("out(")[1]:
+            if letter == "'" or letter == '"': instr.append(True), inparID.append()
+    
