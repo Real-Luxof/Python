@@ -4,8 +4,10 @@ this is where i make stuff that isn't LuxOS, but i'm still interested in doing
 have fun with any of these
 for anything that might require explanation, here's a description:
 
-Birthday Paradox - Search it up, or optionally watch the VSauce2 video on it. Run the program to get a quick lesson on it.
+BirthdayParadox - Search it up, watch the VSauce2 video on it, or run the program to get a quick lesson on it.
 
-Encryption (Somehow) - My own Cipher
+Encryption - My own Cipher.
 
-FLHLang - An interpreted programming language
+FLHLang - An interpreted programming language.
+
+SendAKey - Autoclicker for keyboards.
