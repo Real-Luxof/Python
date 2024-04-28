@@ -13,3 +13,5 @@ FLHLang - An interpreted programming language.
 SendAKey - Autoclicker for keyboards.
 
 DRM - Minimal protection, just felt like it.
+
+Search - Ever needed to find in how many files a specific text exists, or doesn't? No? have it anyway.

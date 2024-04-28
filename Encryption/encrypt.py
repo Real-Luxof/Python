@@ -110,11 +110,11 @@ if len(param) > 1:
         "~": "IndustrialRevolutionAndItsConsequencesHaveBeenADisasterForTheHumanRace "
     }
     cuttables = [["WHEREIS, REPEAT, WHEREIS", "TASKFORCETHIRTYFOUR? THEWORLD WONDERS."],["SINCE WHEN DID", "YOU EVER CARE?"],["isitreal lybasedtho ughh?" + "THEEI GHTWORL DWON DERS"],["heheheha PLANTSVSZOMBIES MAKESMEWET", "hohohohu PLANTSVSZOMBIES DOESSTUFFTOMEINTHEASS"],["IndustrialRevolution AndItsConsequences HaveBeenADisasterForTheHumanRace","IndustrialRevolution AndItsConsequences HaveBeenADisasterForTheHumanRace"]]
-    output = ""
     if findoption(param,"password=") != False: password = findoption(param,"password="); password1 = password[slice(0,len(password)//2)]; password2 = password[slice(len(password)//2,len(password))]
     else: password1 = "ba"; password2 = "se"
     if findoption(param, "resultfile=") != False: resultfile = findoption(param,"resultfile=")
-    else: resultfile = "DECRYPTIONRESULT.txt"
+    else: resultfile = "ENCRYPTIONRESULT.txt"
+    output = ""
     for char in data:
         output += encryptiontable[char]
 
@@ -122,4 +122,4 @@ if len(param) > 1:
         cuttable = choice(cuttables)
         f.write(cuttable[0] + " " + password1 + " " + output + " " + password2 + " " + cuttable[1])
 else:
-    print("Usage: decrypt (required)file (optional)resultfile=(entername) (optional)password=(enterpassword)\nDon't forget the resultfile= and password=.")
+    print("Usage: encrypt (required)file (optional)resultfile=(entername) (optional)password=(enterpassword)\nDon't forget the resultfile= and password=.")

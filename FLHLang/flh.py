@@ -1,4 +1,4 @@
-"""The Interpreter for FeelsLikeHellLang. The name is totally not a representation of what I feel when writing this code."""
+"""The official Interpreter for FeelsLikeHellLang. The name is totally not a representation of what I feel when writing this code."""
 # Loading
 
 # Imports and Arguments

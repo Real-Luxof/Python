@@ -1,0 +1,7 @@
+func mix(arg1 arg2) {
+	console.out(arg1 + arg2)
+	var returnable
+	return returnable
+}
+var returned = mix(1 2)
+console.out(returned + " Yay! It worked!")
