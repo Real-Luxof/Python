@@ -1,4 +1,4 @@
 lorem = "the value is: "
 ipsum = 200
 dormet = ". Yep."
-console.out(lorem + ipsum + dormet)
+out(lorem + ipsum + dormet)

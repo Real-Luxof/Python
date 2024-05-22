@@ -1,5 +1,5 @@
 func mix(arg1 arg2) {
-	console.out(arg1 + arg2)
+	out(arg1 + arg2)
 	var returnable
 	return returnable
 }
