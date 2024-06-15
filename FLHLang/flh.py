@@ -1,26 +1,29 @@
 """The official Interpreter for FeelsLikeHellLang. The name is totally not a representation of what I feel when writing this code."""
-
+import math
 # Imports and Arguments
 from sys import argv
 import typing
+from ast import literal_eval
 if len(argv) < 2 or len(argv) > 2: print("Usage: flh (filename)")
 
 # Variables
 vars: dict = {}
+vars_list: list = [] # Used for the parser to figure shit out.
 keywords: list = ["var", "out"]
 operators: list = ["+", "-", "%", "/", "*", "^"]
 varsetoperators: list = ["=", "+=", "-="]
 
 # Functions
-def throwerr(lineindex: int, wordindex: int, errmessage: str) -> None:
+def throwerr(error_info: tuple[int, int], errmessage: str) -> None:
     """Throws an error to the user.
 
     Args:
-        lineindex (int): What line number did the error happen at?
-        wordindex (int): What word number did the error happen at?
+        error_info (tuple): Info about the error. First element is the line index, second is the word index.
         errmessage (str): The error message to throw.
     """
-    print(f"ERR AT LINE {lineindex + 1}, WORD {wordindex + 1}: {errmessage}")
+    line_index = error_info[0]
+    word_index = error_info[1]
+    print(f"ERR AT LINE {line_index + 1}, WORD {word_index + 1}: {errmessage}")
     quit()
 
 def notoutofbounds(list: list, index: int) -> bool:
@@ -38,7 +41,7 @@ def notoutofbounds(list: list, index: int) -> bool:
 
 def isint(string: str) -> bool:
     """
-    Determines if {string} is an integer.
+    Determines if string is an integer.
     
     Example:
         if isint("1234"): print("Success!")
@@ -47,7 +50,8 @@ def isint(string: str) -> bool:
     try: int(string); return True
     except(ValueError): return False
 
-def calculate(num1, op, num2):
+def calculate(num1: int, op: str, num2: int):
+    """Literally the name."""
     match op:
         case "+": return num1 + num2
         case "-": return num1 - num2
@@ -69,6 +73,23 @@ def isvar(variable: str) -> bool:
     try: vars[variable]; return True
     except(KeyError): return False
 
+def givetype(variable: str) -> typing.Any:
+    """Checks if a string is actually a string representation of another type.
+
+    Args:
+        variable (str): The string to be checked.
+
+    Returns: variable, but without the string representation.
+    """
+    if isint(variable): return int(variable)
+    else:
+        try:
+            return literal_eval(variable)
+        except(SyntaxError):
+            return variable
+        except(ValueError):
+            return variable
+
 def getsetvar(variable: str, value: typing.Any=None) -> typing.Any | bool:
     """
     If {value} is set to None, it will try to return the value of {variable}.
@@ -80,7 +101,7 @@ def getsetvar(variable: str, value: typing.Any=None) -> typing.Any | bool:
     if value == None:
         try: return vars[variable]
         except(KeyError): return False
-    else: vars[variable] = value; return True
+    else: vars[variable] = givetype(value); return True
 
 #def console(line: str) -> None:
 #    """
@@ -102,11 +123,12 @@ def getsetvar(variable: str, value: typing.Any=None) -> typing.Any | bool:
 #        for letter in cline.split("out(")[1]:
 #            if letter == "'" or letter == '"': instr.append(True), inparID.append()
 
+# The parser-lexer-compiler whatever thing
 def parsefile(pathtofile):
 
     f = open(pathtofile, "r")
 
-    global vars
+    global vars_list
     global keywords
     global operators
     global varsetoperators
@@ -126,77 +148,98 @@ def parsefile(pathtofile):
 
         for wordindex in range(len(cookedline)):
             word = cookedline[wordindex]
-            if notoutofbounds(cookedline, wordindex + 1):
-                nextword = cookedline[wordindex + 1]
+            error_info = (uncookedlineindex, wordindex)
+            error_info_nextword = (uncookedlineindex, wordindex + 1)
+            word_is_defined = False
 
-            if word not in keywords and word not in vars and word not in operators and word not in varsetoperators and not getvarflag and not isint(word):
-                throwerr(uncookedlineindex, wordindex, "UNDEFINED WORD")
+            if notoutofbounds(cookedline, wordindex + 1): nextword = cookedline[wordindex + 1]
 
-            elif word in vars:
+            if getvarflag: word_is_defined = True
+
+            if word in vars_list:
                 if calcflag:
                     calcflag = False
+                    word_is_defined = True
                     continue
-                if getvarflag:
+                elif getvarflag:
+                    word_is_defined = True
                     continue
 
                 getvarflag = True
+                word_is_defined = True
 
                 parsedline.append("getvar")
                 parsedline.append(word)
 
-            elif word in operators: pass
+            elif word in operators: word_is_defined = True
 
             match word:
                 case "var":
                     getvarflag = True
+                    word_is_defined = True
+
                     parsedline.append("getvar")
+                    vars_List.append(nextword)
                     parsedline.append(nextword)
 
                 case "=":
                     if not getvarflag:
-                        throwerr(uncookedlineindex, wordindex, "MISPLACED EQUAL SIGN")
+                        throwerr(error_info, "MISPLACED EQUAL SIGN")
 
                     getvarflag = False
+                    word_is_defined = True
+
+                    parsedline.append(nextword)
                     getsetvar(parsedline[-1], nextword)
 
                 case "+=":
                     if not getvarflag:
-                        throwerr(uncookedlineindex, wordindex, "MISPLACED PLUS EQUAL SIGN")
+                        throwerr(error_info, "MISPLACED PLUS EQUAL SIGN")
 
-                    if isvar(parsedline[-1]):
-                        if not isint(getsetvar(parsedline[-1])):
-                            throwerr(uncookedlineindex, wordindex + 1, "CANNOT ADD [STR] AND [INT]")
+                    if getvarflag:
+                        if isvar(nextword):
+                            try:
+                                getsetvar(parsedline[-1]) + getsetvar(nextword)
+                            except(TypeError):
+                                throwerr(error_info, "CANNOT ADD DUE TO TYPE DIFFERENCE")
+                        else:
+                            try:
+                                getsetvar(parsedline[-1]) + givetype(nextword)
+                            except(TypeError):
+                                throwerr(error_info, "CANNOT ADD DUE TO TYPE DIFFERENCE")
 
-                        if not isvar(nextword):
-                            if not isint(nextword):
-                                throwerr(uncookedlineindex, wordindex + 1, "CANNOT ADD [INT] AND [STR]")
-                        
-                        elif not isint(getsetvar(nextword)):
-                            throwerr(uncookedlineindex, wordindex + 1, "CANNOT ADD [INT] AND [STR]")
+                    elif isvar(nextword):
+                        try:
+                            givetype(parsedline[-1]) + getsetvar(nextword)
+                        except(TypeError):
+                            throwerr(error_info, "CANNOT ADD DUE TO TYPE DIFFERENCE")
 
-                        parsedline[-1] = int(getsetvar(parsedline[-1])) + int(nextword)
-                        calcflag = True
+                    else:
+                        try:
+                            givetype(parsedline[-1]) + givetype(nextword)
+                        except(TypeError):
+                            throwerr(error_info, "CANNOT ADD DUE TO TYPE DIFFERENCE")
 
-                    elif isint(parsedline[-1]):
-                        if not isint(nextword):
-                            throwerr(uncookedlineindex, wordindex, "CANNOT ADD [INT] AND [STR]")
-                        parsedline[-1] = int(parsedline[-1]) + int(nextword)
-
-                    elif isint(nextword):
-                        throwerr(uncookedlineindex, wordindex, "CANNOT ADD [STR] AND [INT]")
-                    
-                    parsedline[-1] = int(parsedline[-1]) + int(nextword)
                     calcflag = True
+                    word_is_defined = True
+
+                    parsedline.append("ADD")
 
                 case "-=":
                     if not getvarflag:
                         return f"ERR AT LINE {uncookedline + 1}, WORD {wordindex + 1}: MISPLACED MINUS EQUAL SIGN"
                     parsedline[-1] -= nextword
                     calcflag = True
+                    word_is_defined = True
 
                 case "out":
                     consoleflag = True
+                    word_is_defined = True
+
                     parsedline.append(word)
+
+            if not word_is_defined:
+                throwerr(error_info, "UNDEFINED WORD")
 
         parsedfile.append(parsedline)
     
@@ -213,5 +256,5 @@ def interpret(parsedfile):
 
 file = parsefile(argv[1])
 
-with open("parsedresult", "w") as result:
+with open(f"{argv[1]}flhbytecode.flhb", "w") as result:
     result.write(str(file))

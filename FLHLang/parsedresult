@@ -1,1 +1,1 @@
-[['getvar', 'a'], ['getvar', 15]]
+[['getvar', 'a'], ['getvar', 'a', 10, 15]]
