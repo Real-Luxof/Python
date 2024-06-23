@@ -218,6 +218,10 @@ def console_parse(error_inf: tuple[str, int], line: list[str]) -> None:
     # yep it's totally not cuz i don't wanna climb the mental walls or do the gymanstics
     # to figure it out all over again
     
+    # If it's not clear what it does even to me, I have to take a break since the brain 
+    # fatigue has caught up to me.
+    # Das ist mein philosophy.
+    
     # Initalization of variables
     global vars_list
     parsed_line = []
@@ -225,6 +229,7 @@ def console_parse(error_inf: tuple[str, int], line: list[str]) -> None:
     strs = []
     in_str = False
     addflag = False
+    prob_var = False
     
     error_info = list(error_inf)
     error_info.append(3)
@@ -316,7 +321,14 @@ def console_parse(error_inf: tuple[str, int], line: list[str]) -> None:
                     
                     elif not in_str:
                         # probably a variable
-                        strs[-1] += ""
+                        if not prob_var:
+                            strs.append("getvar ")
+                            prob_var = True
+                        
+                        if letter != " ":
+                            strs[-1] += letter
+                        else:
+                            prob_var = False
     
     for string_index in range(len(strs)):
         string = strs[string_index]
@@ -328,7 +340,7 @@ def console_parse(error_inf: tuple[str, int], line: list[str]) -> None:
         if not string_without_getvar in vars_list.keys():
             throwerr_line(error_inf, f"VARIABLE {string_without_getvar} MISSING.")
     
-    return strs
+    return ["out"] + strs
 
 #def console(line: str) -> None:
 #    """
@@ -377,6 +389,11 @@ def parsefile(pathtofile):
         # LET HIM COOK :fire:
         cookedline = uncookedline.split(" ")
         parsedline = []
+        
+        if uncookedline.startswith("out") or uncookedline.startswith("in"):
+            parsedline = console_parse((pathtofile, uncookedlineindex), uncookedline.removesuffix("\n"))
+            parsedfile.append(parsedline)
+            continue
         
         for wordindex in range(len(cookedline)):
             # Initialize some variables -
@@ -485,18 +502,12 @@ def parsefile(pathtofile):
                     
                     elif getvarflag:
                         parsedline.append(word)
-                        # getvarflag is still needed.
-                        word_is_defined = True
-                    
-                    elif word.startswith("out") or word.startswith("in"):
-                        consoleflag = True
+                        # getvarflag is still needed, so don't disable it.
                         word_is_defined = True
                     
                     if not word_is_defined:
                         throwerr(error_info, "UNDEFINED WORD.")
-                
-            if consoleflag:
-                pass
+        
 
         parsedfile.append(parsedline)
     
@@ -516,5 +527,6 @@ if __name__ == "__main__":
 
     # flb stands for Feels Like Bytecode
     # for some reason i'm really proud of myself for that
-    with open(f"{argv[1].removesuffix(".flh")}.flb", "w") as result:
+    file_name = argv[1].removesuffix(".flh").split("\\")[-1]
+    with open(f"FeelsLikeBytecode\\{file_name}.flb", "w") as result:
         result.write(str(file))

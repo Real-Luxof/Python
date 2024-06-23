@@ -1,7 +1,7 @@
 func mix(arg1 arg2) {
 	out(arg1 + arg2)
-	var returnable
+	var returnable = arg1 + arg2
 	return returnable
 }
 var returned = mix(1 2)
-console.out(returned + " Yay! It worked!")
+out(returned + " Yay! It worked!")
