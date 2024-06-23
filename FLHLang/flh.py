@@ -256,7 +256,7 @@ def console_parse(error_inf: tuple[str, int], line: list[str]) -> None:
         for letter_index in range(4, len(line)):
             letter = line[letter_index]
             error_now = True # this is used SPECIFICALLY for +
-            add_var = False # this is also used SPECIFICALLY for +
+            #add_var = False # this is also used SPECIFICALLY for +
             # kmn kmn kmn kmn kmn kmn kmn kmn kmn kmn kmn
             error_info[-1] += 1
             del next_letters[0]
@@ -305,20 +305,22 @@ def console_parse(error_inf: tuple[str, int], line: list[str]) -> None:
                                 throwerr_letter(error_info, "PARENTHESIS CLOSED BEFORE ADDING ANYTHING.")
                             
                             elif next_letter != " ":
-                                print(next_letter)
                                 error_now = False
-                                add_var = True
+                                #add_var = True
                                 break
                         
                         if error_now:
                             throwerr_letter(error_info, "ADDING LITERALLY NOTHING.")
                         
-                        if add_var:
-                            strs.append("getvar ")
+                        # commenting the add_var parts out fixed a problem wtf
+                        # this code is a black box and i don't wanna bother putting all of it in my mind
+                        #if add_var:
+                        #    strs.append("getvar ")
                     
                     elif addflag and letter != " ":
                         strs[-1] += letter
                     
+                    # this part was made so out(foo) does not return ['']
                     elif not in_str:
                         # probably a variable
                         if not prob_var:
