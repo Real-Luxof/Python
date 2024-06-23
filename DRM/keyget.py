@@ -6,4 +6,4 @@ while key in keys.keys:
     key = ''.join(random.choice(letters) for letter in range(100))
 nowkeys = keys.keys
 nowkeys.append(key)
-with open("keys.py", "w") as f: f.write("keys = " + str(nowkeys))
+with open("keys.py", "w") as f: f.write("\"\"\"The database for keys.\"\"\"\nkeys = " + str(nowkeys))

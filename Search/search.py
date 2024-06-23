@@ -4,6 +4,7 @@ from os import listdir # I'll need this
 
 if len(argv) < 2:
     print("Usage: search (path\\to\\folder) (the rest is text. no double quotes!)")
+    quit()
 # If invalid number of arguments, tell them how to use it.
 del argv[0]
 directory = " ".join(argv)
