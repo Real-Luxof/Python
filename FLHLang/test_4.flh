@@ -1,4 +1,4 @@
-lorem = "the value is: "
-ipsum = 200
-dormet = ". Yep."
+var lorem = "the value is: "
+var ipsum = 200
+var dormet = ". Yep."
 out(lorem + ipsum + dormet)

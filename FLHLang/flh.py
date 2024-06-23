@@ -498,9 +498,10 @@ def parsefile(pathtofile):
                     
                     elif final_setvarflag:
                         parsedline.append(word)
-                        # Disable final_setvarflag as it is no longer needed.
-                        final_setvarflag = False
-                        word_is_defined = True
+                        # Don't disable final_setvarflag if it's still needed.
+                        if word.endswith("\""):
+                            final_setvarflag = False
+                            word_is_defined = True
                     
                     elif getvarflag:
                         parsedline.append(word)
