@@ -1,3 +1,3 @@
-from flh import console_parse
-output = console_parse(("this file lol", 21), "out(hi)")
-print(output)
+from flh import shunting_yard_algorithm
+user_input = input("Input an equation: ")
+print(shunting_yard_algorithm(user_input))

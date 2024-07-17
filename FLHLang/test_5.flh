@@ -5,3 +5,39 @@ func mix(arg1 arg2) {
 }
 var returned = mix(1 2)
 out(returned + " Yay! It worked!")
+
+{
+	"func": {
+		"name": "mix_int",
+		"arguments": [
+			"arg1",
+			"arg2"
+		],
+		"statements": {
+			"out": {
+				"math": {
+					"var": "arg1",
+					"+",
+					"var": "arg2"
+				}
+			}
+
+			"var": {
+				"name": "returnable",
+				"value": {
+					"math": {
+						"var": "arg1",
+						"+",
+						"var": "arg2"
+					}
+				}
+			},
+
+			"return": {
+				"value": {
+					"var": "returnable"
+				}
+			}
+		}
+	}
+}

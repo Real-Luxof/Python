@@ -11,9 +11,11 @@ if len(argv) < 2 or len(argv) > 2: print("Usage: flh (filename)")
 
 # Variables
 vars: dict = {}
+
 # Isn't really a list, just has variable names and their types.
-vars_list: dict = {} # Used for the parser-lexer-compiler to figure shit out.
-keywords: list = ["var", "out"]
+vars_list: dict = {} # Used for the parser to figure type shit out.
+
+keywords: list = ["var", "out"] # puny
 operators: list = ["+", "-", "%", "/", "*", "^"]
 varsetoperators: list = ["=", "+=", "-="]
 
@@ -68,6 +70,93 @@ def throwerr_letter(error_info: tuple[str, int, int], errmessage: str) -> None:
     print(f"{path}:{line_index + 1}:{letter_index}: {errmessage}")
     print(f"{path}: ERR AT LINE {line_index}, LETTER {letter_index + 1}: {errmessage}")
     quit()
+
+
+def shunting_yard_algorithm(equation_infix: str) -> str:
+    """Applies the shunting yard algorithm to translate an input into reverse polish notation.
+
+    Args:
+        equation_infix (str): The equation, should be in infix notation.
+
+    Returns:
+        str: The equation as expressed in postfix (reverse polish) notation.
+    """
+    # yarrr, i hate parenthesis. FUCK parenthesis.
+    equation = equation_infix.split(" ")
+    operators = ["+", "-", "%", "/", "*", "^"]
+    # 0 = left
+    # 1 = right
+    assoc_table = {
+        "^": 1,
+        "*": 0,
+        "%": 0,
+        "/": 0,
+        "+": 0,
+        "-": 0
+    }
+    prec_table = {
+        "^": 4,
+        "*": 3,
+        "%": 3,
+        "/": 3,
+        "+": 2,
+        "-": 2
+    }
+    op_1 = None
+    op_2 = None
+    output_queue = []
+    operator_stack = []
+    
+    for token in equation:
+        if isint(token):
+            output_queue.append(token)
+        
+        elif token in operators:
+            if len(operator_stack) == 0:
+                operator_stack.append(token)
+                continue
+            
+            op_1 = token
+            while True:
+                if len(operator_stack) == 0:
+                    break
+                
+                op_2 = operator_stack[-1]
+                
+                if op_2 == "(":
+                    break
+                
+                if (
+                    (prec_table[op_2] > prec_table[op_1])
+                    or 
+                    (prec_table[op_2] == prec_table[op_1] and assoc_table[op_2] == 0)
+                ):
+                    output_queue.append(operator_stack.pop())
+                else:
+                    break
+                
+            operator_stack.append(token)
+        
+        elif token == "(":
+            operator_stack.append(token)
+        
+        elif token == ")":
+            if len(operator_stack) == 0:
+                ValueError("Parenthesis not even opened, what are you closing?")
+            
+            if "(" not in operator_stack:
+                ValueError("Parenthesis not even opened, what are you closing?")
+            
+            for op_index in reversed(range(len(operator_stack))):
+                if operator_stack[op_index] == "(":
+                    operator_stack.pop(op_index)
+                    break
+                
+                output_queue.append(operator_stack.pop(op_index))
+    
+    output_queue += list(reversed(operator_stack))
+    
+    return " ".join(output_queue)
 
 
 def notoutofbounds(list: list, index: int) -> bool:
@@ -156,8 +245,8 @@ def give_internal_type(variable: str) -> str:
         pass
     
     if isint(variable): return "INTEGER"
-    elif variable.startswith("[") and variable.endswith("]"): return "LIST"
-    elif variable.startswith("(") and variable.endswith(")"): return "TUPLE"
+    elif variable.startswith("["): return "LIST"
+    elif variable.startswith("("): return "TUPLE"
     else: return "STRING"
 
 
@@ -364,6 +453,238 @@ def console_parse(error_inf: tuple[str, int], line: list[str]) -> None:
 #        for letter in cline.split("out(")[1]:
 #            if letter == "'" or letter == '"': instr.append(True), inparID.append()
 
+
+def lex(text: str):
+    text_lines = text.split("\n")
+
+    tokens = []
+    occupied: list[str] = [] # please dont ask idk how to express this
+    
+    opening_and_closing_triggers = {
+        '"': '"',
+        "(": ")",
+        "[": "]",
+        " ": " "
+    }
+
+    for line in text_lines:
+        # THROUGH THE FIRE AND THE FLAMES
+        # THROUGH THE FIRE AND THE FLAMES
+        for letter in line:
+            
+            if letter in opening_and_closing_triggers.keys():
+                occupied.append(letter)
+                continue
+            elif letter != " ":
+                occupied.append(" ")
+                continue
+            
+            if letter == opening_and_closing_triggers[occupied[-1]]:
+                del occupied[-1]
+
+
+# nya. ich nii san nya, arigato.
+# average 11:50 PM comment:
+
+# 4th time people, how many more are left?
+def parsefile(pathtofile):
+    
+    # Get globals (fun*)
+    global vars_list
+    global operators
+    
+    # Read le file.
+    f = open(pathtofile, "r")
+    file = f.read().split("\n")
+    f.close()
+    
+    # AST (yay)
+    # top layer has to be a list (nay)
+    AST = []
+    
+    for unc_line_index in range(len(file)):
+        # line stuff
+        unc_line = file[unc_line_index]
+        line = unc_line.split(" ")
+        
+        # temp ast to append to AST
+        TEMP_AST = {}
+        
+        # need flags variables (fun*)
+        var_name_set_flag = False
+        var_val_set_flag = False
+        
+        for word_index in range(len(line)):
+            # error info gathering
+            word = line[word_index]
+            error_info = (pathtofile, unc_line_index, word_index)
+            
+            match word:
+                
+                case "var":
+                    var_name_set_flag = True
+                    TEMP_AST["var"] = {}
+                
+                case "=":
+                    if not var_val_set_flag:
+                        throwerr(error_info, "MISPLACED EQUAL SIGN.")
+                
+                case _:
+                    if var_name_set_flag:
+                        
+                        # set name :D
+                        TEMP_AST["var"]["name"] = word
+                        
+                        # some flags
+                        var_name_set_flag = False
+                        var_val_set_flag = True
+                        continue
+                    
+                    elif var_val_set_flag:
+                        
+                        # huzzah, value setting.
+                        type_of_val = give_internal_type(word)
+                        
+                        if type_of_val == "INT":
+                            TEMP_AST["var"]["val"] = int(word)
+                        
+                        # take it if it's a one word thing
+                        # yeah strings are defined with double quotes here
+                        # fuck the user if they use single quotes i guess
+                        if word.startswith("\"") and word.endswith("\""):
+                            # remove the double quotes
+                            val = word.removeprefix("\"")
+                            val = val.removesuffix("\"")
+                            TEMP_AST["var"]["val"] = val
+                            
+                            var_val_set_flag = False
+                            continue
+                        
+                        elif word_index == len(line):
+                            if isint(word):
+                                TEMP_AST["var"]["val"] = int(word)
+                            
+                            continue
+                        
+                        # what if it's not that simple?
+                        # then embark with me on this journey of my mind only
+                        # half analyzing what it sees with a for loop, new_error_info,
+                        # and a chase for the last ending double quotes that might not
+                        # even exist.
+                        if not unc_line.endswith("\""):
+                            throwerr(error_info, "STRING OPENED BUT NOT CLOSED.")
+                        
+                        # spaghetti code?
+                        math = []
+                        val = word.removeprefix("\"")
+                        not_in_str = False
+                        op_added = False
+                        limit = len(line) - word_index
+                        
+                        for index in range(1, limit):
+                            new_error_info = (pathtofile, unc_line_index, word_index + index)
+                            
+                            str_word = line[word_index + index] # lack of a better term in my mind
+                            
+                            if not_in_str:
+                                if str_word in operators:
+                                    if op_added:
+                                        throwerr(new_error_info, "OPERATOR CHAIN.")
+                                    elif index == limit:
+                                        throwerr(new_error_info, "OPERATOR ADDED AT THE END OF THE LINE.")
+                                    
+                                    math += str_word
+                                    op_added = True
+                                
+                                elif str_word.startswith("\""):
+                                    if not op_added:
+                                        throwerr(new_error_info, "NEW STRING OPENED WITH NO OPERATOR BEFOREHAND.")
+                                    
+                                    not_in_str = False
+                                    val = str_word.removeprefix("\"")
+                                    op_added = False
+                                
+                                elif isint(str_word):
+                                    if not op_added:
+                                        throwerr(new_error_info, "NEW INTEGER ADDED WITH NO OPERATOR BEFOREHAND.")
+                                    
+                                    if index == limit:
+                                        break
+                                    
+                                    math += str_word
+                            
+                            elif str_word.endswith("\""):
+                                val += str_word.removesuffix("\"")
+                                
+                                if index == limit:
+                                    break
+                                
+                                math += val
+                                val = ""
+                                not_in_str = True
+                            
+                            
+                            # "if math's not empty, stop the line" for scrubs
+                            if not math:
+                                break
+                            
+                            # time to sort out math :(
+                            
+                            # PEMDAS without the P
+                            EMDAS = {
+                                "^": 2,
+                                "*": 1,
+                                "/": 1,
+                                "+": 0,
+                                "-": 0
+                            } 
+                            
+                            equation = {} # i have no idea how to explain this
+                            
+                            for op in EMDAS.keys():
+                                if op not in math:
+                                    del EMDAS[op]
+                            
+                            for step_index in range(len(math)):
+                                step = math[step_index]
+                                
+                                if not notoutofbounds(step, "op"):
+                                    continue
+                                
+                                op = step["op"]
+                                highest_prio_op = EMDAS[list(EMDAS.keys())[0]]
+                                
+                                #if op
+                            
+                            for prio_step_index in range(len(EMDAS)):
+                                prio_step = EMDAS[prio_step_index]
+                                # no better word than prio_step in my mind rn
+                                
+                                for step_index in range(len(math)):
+                                    step = math[step_index]
+                                    
+                                    if not notoutofbounds(step, "op"):
+                                        continue
+                                    
+                                    operator = step["op"]
+                                    
+                                    if operator == prio_step:
+                                        if not equation:
+                                            equation = {
+                                                prio_step: {}
+                                            }
+                                            continue
+                                        
+                                        deepest_point = list(equation.keys())
+                                        
+                                        #for i in range(len(EMDAS)):
+                                            #if EMDAS[prio_step_index + 1]
+                                        
+        
+        AST.append(TEMP_AST)
+
+
+"""
 # Completes the whole olympics and gets a gold medal, called a cyclist.
 def parsefile(pathtofile):
     # Get some globals.
@@ -515,7 +836,7 @@ def parsefile(pathtofile):
         parsedfile.append(parsedline)
     
     return parsedfile
-
+"""
 def interpret(parsedfile):
     global vars
     global keywords

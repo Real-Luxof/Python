@@ -2,3 +2,12 @@ var lorem = "the value is: "
 var ipsum = 200
 var dormet = ". Yep."
 out(lorem + ipsum + dormet)
+
+{
+    "var": {
+        "name": "lorem",
+        "value": "the value is: "
+    },
+
+    {}
+}

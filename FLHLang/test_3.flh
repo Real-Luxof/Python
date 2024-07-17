@@ -1,3 +1,28 @@
-var foo = "bar"
+var foo = 1 + 2
 var bar = "yolo"
 out(foo + bar)
+
+{
+    "var": {
+        "name": "foo",
+        "value": {
+            "math": [
+                1,
+                "+",
+                "2"
+            ]
+        }
+    },
+
+    "var": {
+        "name": "bar",
+        "value": {
+            "str": "yolo"
+        }
+    }
+
+    "out": {
+        "var": "foo",
+        "var": "bar"
+    }
+}
