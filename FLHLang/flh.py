@@ -455,10 +455,38 @@ def console_parse(error_inf: tuple[str, int], line: list[str]) -> None:
 
 
 def lex(text: str):
+    # what it should do:
+    # IN << 'it can lex this right? yeah okay "test" (muahaha "test2") "test3 "'
+    # OUT >> [
+        # ['it', 'can', 'lex', 'this', 'right?', 'yeah', 'okay'],
+        # ['"', 'test', '"'],
+        # ['(', 'muahaha', ['"', 'test2', '"'], ')']],
+        # ['"', 'test3 ', '"']
+    # ]
+    #
+    # IN << 'out("haiii :3")'
+    # OUT >> [
+        # ['out'],
+        # ['(', ['"', 'haiii :3', '"'], ')']
+    #]
+    #
+    # IN << 'var a = "HIGH QUALITY CHIC" + "KEN FOR SALE"'
+    # OUT >> [
+        # ['var', 'a', '='],
+        # ['"', 'HIGH QUALITY CHIC', '"'],
+        # ['+'],
+        # ['"', 'KEN FOR SALE', '"']
+    #]
+    #
+    # i don't know what happens if there's an unclosed parenthesis or something
+    # but i'll leave that to the parser to find and freak out about lmao
     text_lines = text.split("\n")
 
-    tokens = []
+    tokens: list[list[str]] = [[]] # this is for lines of tokens
     occupied: list[str] = [] # please dont ask idk how to express this
+    buffer: list[str, list[str]] = [] # idk how to express this either
+    previous_accessing_indexes = []
+    current_accessing_index = tokens[-1] # i pray to god this is a pointer and not a clone
     
     opening_and_closing_triggers = {
         '"': '"',
@@ -467,20 +495,37 @@ def lex(text: str):
         " ": " "
     }
 
-    for line in text_lines:
+    for letter in text:
         # THROUGH THE FIRE AND THE FLAMES
         # THROUGH THE FIRE AND THE FLAMES
-        for letter in line:
+        
+        if letter == " ":
+            if len(occupied) > 0:
+                current_accessing_index.append()
+            pass
+        elif letter == occupied[-1]:
+            current_accessing_index
+        
+        elif letter in opening_and_closing_triggers.keys():
+            occupied.append(letter)
+            current_accessing_index.append(letter)
             
-            if letter in opening_and_closing_triggers.keys():
-                occupied.append(letter)
-                continue
-            elif letter != " ":
-                occupied.append(" ")
-                continue
+            continue
+        
+        elif letter != " ":
+            occupied.append(" ")
+            current_accessing_index.append(letter)
             
-            if letter == opening_and_closing_triggers[occupied[-1]]:
-                del occupied[-1]
+            continue
+        
+        if letter == opening_and_closing_triggers[occupied[-1]]:
+            del occupied[-1]
+            current_accessing_index = previous_accessing_indexes.pop()
+            current_accessing_index.append(letter)
+            
+            continue
+        
+        current_accessing_index
 
 
 # nya. ich nii san nya, arigato.
